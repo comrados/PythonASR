@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 import glob
+import time
 from pydub import AudioSegment
 
 
@@ -16,7 +17,8 @@ def init_args(argv):
     parser = argparse.ArgumentParser(description='''Converts .ogg file(s) to wav. 
                                                  Files are saved under the same name
                                                  but extension is different.''', prog='ogg_to_wav.py')
-    parser.add_argument('-v', '--verbose', help='Verbose output.', default=False, action='store_true')
+    parser.add_argument('-v', '--verbose', help='Verbose output: parsed args, files, elapsed time, sample rate.',
+                        default=False, action='store_true')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-p', '--path', help='Path to the folder with .ogg files.', metavar='<path>')
     group.add_argument('-f', '--files', nargs='+', help='Distinct file(s) to convert.', metavar='<files>')
@@ -130,6 +132,7 @@ def main(argv):
 
     :param argv: input arguments
     """
+    time0 = int(round(time.time() * 1000))
     args = init_args(argv)
     count = 0
     out_path = args.out_path
@@ -137,8 +140,13 @@ def main(argv):
         count, out_path = convert_path(args)
     if args.path is None:
         count, out_path = convert_files(args)
+    time1 = int(round(time.time() * 1000))
     print()
-    print("Done,", count, "files converted.\nOutput directory:", out_path, "\nSample rate:", args.sample_rate)
+    print("Done,", count, "files converted.")
+    if args.verbose:
+        print("Output directory:", out_path)
+        print("Sample rate:", args.sample_rate)
+        print("Elapsed time:", time1-time0)
 
 
 if __name__ == "__main__":

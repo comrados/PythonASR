@@ -90,7 +90,7 @@ def convert_path(argv):
             out = convert_ogg_to_wav(file, argv.sample_rate, out_path)
             count += 1
             if argv.verbose:
-                print(file, '->', out)
+                print(f'{count}> {file} -> {out}')
     else:
         print("Given path is not directory", argv.path)
         sys.exit(2)
@@ -120,7 +120,7 @@ def convert_files(argv):
             out = convert_ogg_to_wav(name, argv.sample_rate, out_path)
             count += 1
             if argv.verbose:
-                print(name, '->', out)
+                print(f'{count}> {name} -> {out}')
         else:
             print("File doesn't exist", file)
     return count, out_path

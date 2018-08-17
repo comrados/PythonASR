@@ -2,7 +2,7 @@ import struct
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from nnOCR import nnOCR
+from mnist.nnOCR import nnOCR
 
 train_img = r'I:\Work\NNtest\train-images'
 train_lab = r'I:\Work\NNtest\train-labels'

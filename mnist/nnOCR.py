@@ -6,17 +6,14 @@ import json
 
 class nnOCR(object):
 
-    def __init__(self, learn_rate=3.0, layers=[784, 16, 16, 10], weights=None, biases=None):
+    def __init__(self, learn_rate=3.0, layers=[784, 16, 16, 10], model=None):
         self.num_layers = len(layers)
         self.layers = layers
-        if biases is None:
+        if model is None:
             self.biases = [np.random.randn(y, 1) for y in layers[1:]]
-        else:
-            self.biases = self.load(biases)
-        if weights is None:
             self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
         else:
-            self.weights = self.load(weights)
+            self.weights, self.biases = self.load_model(model)
         self.mapper = np.vectorize(self.sigmoid)
         self.learn_rate = np.array([learn_rate])
 
@@ -120,13 +117,12 @@ class nnOCR(object):
                 r += 1
         return r
 
-    def load(self, path):
+    def load_model(self, path):
         with open(path) as infile:
             data = json.load(infile)
-        return [np.array(x) for x in data]
+        return [np.array(x) for x in data['weights']], [np.array(x) for x in data['biases']]
 
-    def save_model(self, path_weights, path_biases):
-        with open(path_weights, 'w') as outfile:
-            json.dump([x.tolist() for x in self.weights], outfile)
-        with open(path_biases, 'w') as outfile2:
-            json.dump([x.tolist() for x in self.biases], outfile2)
+    def save_model(self, path):
+        d = dict(weights=[x.tolist() for x in self.weights], biases=[x.tolist() for x in self.biases])
+        with open(path, 'w') as outfile:
+            json.dump(d, outfile)

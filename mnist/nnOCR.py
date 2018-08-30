@@ -1,14 +1,22 @@
 import numpy as np
 import random
+import datetime
+import json
 
 
 class nnOCR(object):
 
-    def __init__(self, learn_rate=3.0, layers=[784, 16, 16, 10]):
+    def __init__(self, learn_rate=3.0, layers=[784, 16, 16, 10], weights=None, biases=None):
         self.num_layers = len(layers)
         self.layers = layers
-        self.biases = [np.random.randn(y, 1) for y in layers[1:]]
-        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
+        if biases is None:
+            self.biases = [np.random.randn(y, 1) for y in layers[1:]]
+        else:
+            self.biases = self.load(biases)
+        if weights is None:
+            self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
+        else:
+            self.weights = self.load(weights)
         self.mapper = np.vectorize(self.sigmoid)
         self.learn_rate = np.array([learn_rate])
 
@@ -32,7 +40,7 @@ class nnOCR(object):
         else:
             return 0
 
-    def forward(self, v):
+    def classify(self, v):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, v) + b
             v = self.mapper(z)
@@ -87,24 +95,38 @@ class nnOCR(object):
         for i in range(len(self.biases)):
             self.biases[i] -= (learn_rate / len(batch)) * nabla_b[i]
 
-    def grad_descent(self, training_data, epochs, batch_size, test_data=None):
+    def train(self, training_data, epochs, batch_size, test_data=None):
         if test_data:
             n_test = len(test_data)
         n = len(training_data)
         for j in range(epochs):
+            t0 = datetime.datetime.now().timestamp()
             random.shuffle(training_data)
             mini_batches = [training_data[k:k + batch_size] for k in range(0, n, batch_size)]
             for mini_batch in mini_batches:
                 self.update_backward(mini_batch, self.learn_rate)
             if test_data:
-                print("Epoch {0}: {1} / {2}".format(j, self.evaluate(test_data), n_test))
+                eval = self.evaluate(test_data)
+                t0 = datetime.datetime.now().timestamp() - t0
+                print("Epoch {0} ({4:.5}s): {1} out of {2} correct ({3:.2%})".format(j, eval, n_test, eval/n_test, t0))
             else:
                 print("Epoch {0} complete".format(j))
 
     def evaluate(self, test_data):
-        test_results = [(np.argmax(self.forward(x)), (np.argmax(y))) for x, y in test_data]
+        test_results = [(np.argmax(self.classify(x)), (np.argmax(y))) for x, y in test_data]
         r = 0
         for x, y in test_results:
             if x == y:
                 r += 1
         return r
+
+    def load(self, path):
+        with open(path) as infile:
+            data = json.load(infile)
+        return [np.array(x) for x in data]
+
+    def save_model(self, path_weights, path_biases):
+        with open(path_weights, 'w') as outfile:
+            json.dump([x.tolist() for x in self.weights], outfile)
+        with open(path_biases, 'w') as outfile2:
+            json.dump([x.tolist() for x in self.biases], outfile2)

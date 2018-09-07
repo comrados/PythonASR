@@ -96,8 +96,8 @@ img, lab = get_img_and_label(tri, trl, 500)
 img = np.array(img).flatten() / 255
 # draw_number(img, lab)
 
-x = nnOCR(learn_rate=0.5, layers=[784, 75, 25, 10], model='model.json')
+x = nnOCR(learn_rate=0.5, layers=[784, 75, 25, 10], model='model2.json', dropout=0.5)
 
 x.train(train_data, 5, 250, test_data=valid_data)
 
-x.save_model('model.json')
+x.save_model('model2.json')

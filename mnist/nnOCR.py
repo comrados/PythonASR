@@ -6,7 +6,7 @@ import json
 
 class nnOCR(object):
 
-    def __init__(self, learn_rate=3.0, layers=[784, 16, 16, 10], model=None):
+    def __init__(self, learn_rate=3.0, layers=[784, 16, 16, 10], model=None, dropout=None):
         self.num_layers = len(layers)
         self.layers = layers
         if model is None:
@@ -14,6 +14,7 @@ class nnOCR(object):
             self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
         else:
             self.weights, self.biases = self.load_model(model)
+        self.dropout = dropout
         self.mapper = np.vectorize(self.sigmoid)
         self.learn_rate = np.array([learn_rate])
 
@@ -61,6 +62,10 @@ class nnOCR(object):
             v = self.mapper(z)
             vs.append(v)
         vs[-1] = self.softmax(z)
+        if self.dropout is not None:
+            mask = [(np.random.rand(*v.shape) < self.dropout) / 1 for v in vs]
+            mask[-1] = np.ones(mask[-1].shape)
+            vs = [v*m for v, m in zip(vs, mask)]
         # backward pass
         e = self.final_error(vs[-1], predict)
         g = e
@@ -105,7 +110,7 @@ class nnOCR(object):
             if test_data:
                 eval = self.evaluate(test_data)
                 t0 = datetime.datetime.now().timestamp() - t0
-                print("Epoch {0} ({4:.5}s): {1} out of {2} correct ({3:.2%})".format(j, eval, n_test, eval/n_test, t0))
+                print("Epoch {0} ({4:.5} s): {1} out of {2} correct ({3:.2%})".format(j, eval, n_test, eval/n_test, t0))
             else:
                 print("Epoch {0} complete".format(j))
 

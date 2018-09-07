@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import sys
 from mnist.nnOCR import nnOCR
 
-train_img = r'I:\Work\NNtest\train-images'
-train_lab = r'I:\Work\NNtest\train-labels'
-test_img = r'I:\Work\NNtest\test-images'
-test_lab = r'I:\Work\NNtest\test-labels'
+train_img = r'mnist\datasets\train-images'
+train_lab = r'mnist\datasets\train-labels'
+test_img = r'mnist\datasets\test-images'
+test_lab = r'mnist\datasets\test-labels'
 
 
 def open_file(path):

@@ -1,10 +1,8 @@
 import sys
 
 if sys.version_info[0] < 3:
-    raise Exception("Must be using Python 3.6 or greater")
-else:
-    if sys.version_info[1] < 6:
-        raise Exception("Must be using Python 3.6 or greater")
+    print("Must be using Python 3")
+    sys.exit(1)
 
 try:
     __import__('Pillow')
@@ -120,14 +118,20 @@ def output(asc, file, co):
     :param co: console output marker
     """
     file = open(file, "wb+")
+    err = False
     for i in range(len(asc)):
         line = ''
         for j in range(len(asc[0])):
             line += asc[i][j]
-            file.write(asc[i][j].encode('utf8'))
+            file.write(asc[i][j].encode('utf-8'))
         file.write(b'\r\n')
         if co:
-            print(line)
+            try:
+                print(line)
+            except UnicodeEncodeError:
+                err = True
+    if err and co:
+        print("Unable to output into console due to the encoding error (try another version of Python)")
     file.flush()
     file.close()
 
@@ -138,13 +142,13 @@ def main(args):
     h, w = calc_new_size(args.ratio, img)
     img = img.resize((w, h))
     if args.verbose:
-        print(f"New sizes: h={h}, w={w}")
+        print("New sizes: h={h}, w={w}".format(h=h, w=w))
     asc = convert_ascii(img, args.shades, args.invert)
     if args.verbose:
         inv = 'not'
         if args.invert:
             inv = ''
-        print(f"Converted to image with {int(args.shades)} shades, colors {inv} inverted")
+        print("Converted to image with {s} shades, colors {i} inverted".format(s=int(args.shades), i=inv))
     output(asc, args.pst, args.console_out)
     print("Text saved to:", args.pst)
     if args.psp is not None:

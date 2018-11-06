@@ -110,6 +110,7 @@ def output(asc, file):
         for j in range(len(asc[0])):
             file.write(asc[i][j].encode('utf8'))
         file.write(b'\r\n')
+    file.flush()
     file.close()
 
 

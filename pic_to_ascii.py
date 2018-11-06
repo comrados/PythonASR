@@ -115,12 +115,22 @@ def output(asc, file):
 
 def main(args):
     img = Image.open(args.pl).convert(mode='L')
-    height, width = calc_new_size(args.ratio, img)
-    img = img.resize((width, height))
+    print("Opened image:", args.pl)
+    h, w = calc_new_size(args.ratio, img)
+    img = img.resize((w, h))
+    if args.verbose:
+        print(f"New sizes: h={h}, w={w}")
     asc = convert_ascii(img, args.shades, args.invert)
+    if args.verbose:
+        inv = 'not'
+        if args.invert:
+            inv = ''
+        print(f"Converted to image with {int(args.shades)} shades, colors {inv} inverted")
     output(asc, args.pst)
+    print("Text saved to:", args.pst)
     if args.psp is not None:
         img.save(args.psp)
+        print("Transformed image saved to:", args.psp)
 
 
 def parse_args(argv):
@@ -131,10 +141,12 @@ def parse_args(argv):
     parser.add_argument('pl', help='Path to the original picture', metavar='<path-load>')
     parser.add_argument('pst', help='Path to save text', metavar='<path-save-txt>')
     parser.add_argument('-psp', help='Path to save picture', metavar='<path-save-pic>', default=None)
+    parser.add_argument('-v', '--verbose', help='Verbose output.', default=False, action='store_true')
     parser.add_argument('-i', '--invert', help='Invert colors', default=False, action='store_true')
-    parser.add_argument('-s', '--shades', help='Number of shades', default=3, choices=[3, 4], type=float)
+    parser.add_argument('-s', '--shades', help='Number of shades', default=3, choices=[3, 4], type=float,
+                        metavar='<shades>')
     parser.add_argument('-r', '--ratio', help="Image shrinking/enlargement coefficient, must be grater than 0",
-                        default=1, type=float)
+                        default=1, type=float, metavar='<ratio>')
     try:
         argp = parser.parse_args(argv)
         return argp

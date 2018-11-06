@@ -1,6 +1,19 @@
+import sys
+
+if sys.version_info[0] < 3:
+    raise Exception("Must be using Python 3.6 or greater")
+else:
+    if sys.version_info[1] < 6:
+        raise Exception("Must be using Python 3.6 or greater")
+
+try:
+    __import__('Pillow')
+except ImportError:
+    import subprocess
+    subprocess.call([sys.executable, "-m", "pip", "install", 'Pillow'])
+
 from PIL import Image
 import argparse
-import sys
 
 
 def calc_new_size(ratio, img):
@@ -104,6 +117,7 @@ def output(asc, file, co):
 
     :param asc: array of characters
     :param file: file to write to
+    :param co: console output marker
     """
     file = open(file, "wb+")
     for i in range(len(asc)):

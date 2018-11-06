@@ -98,7 +98,7 @@ def convert_ascii(image, shades, invert):
     return [x[::-1] for x in new]
 
 
-def output(asc, file):
+def output(asc, file, co):
     """
     Writes text file wih chars
 
@@ -107,9 +107,13 @@ def output(asc, file):
     """
     file = open(file, "wb+")
     for i in range(len(asc)):
+        line = ''
         for j in range(len(asc[0])):
+            line += asc[i][j]
             file.write(asc[i][j].encode('utf8'))
         file.write(b'\r\n')
+        if co:
+            print(line)
     file.flush()
     file.close()
 
@@ -127,7 +131,7 @@ def main(args):
         if args.invert:
             inv = ''
         print(f"Converted to image with {int(args.shades)} shades, colors {inv} inverted")
-    output(asc, args.pst)
+    output(asc, args.pst, args.console_out)
     print("Text saved to:", args.pst)
     if args.psp is not None:
         img.save(args.psp)
@@ -146,6 +150,7 @@ def parse_args(argv):
     parser.add_argument('-i', '--invert', help='Invert colors', default=False, action='store_true')
     parser.add_argument('-s', '--shades', help='Number of shades', default=3, choices=[3, 4], type=float,
                         metavar='<shades>')
+    parser.add_argument('-co', '--console-out', help='Console output of ascii-art', default=False, action='store_true')
     parser.add_argument('-r', '--ratio', help="Image shrinking/enlargement coefficient, must be grater than 0",
                         default=1, type=float, metavar='<ratio>')
     try:

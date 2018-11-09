@@ -159,4 +159,4 @@ save_arr_as_img(thres, 'thres', file_name, ext)
 final = tracking(thres, weak, strong=255)
 save_arr_as_img(final, 'final', file_name, ext)
 
-print()
+print('done')
